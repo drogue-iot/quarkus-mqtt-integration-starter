@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    env:
+      IMAGE_NAME: quarkus-mqtt-integration-example
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build with Maven
+        run: mvn --batch-mode package
+
+      - name: Create image
+        run: |
+          docker build -t ${IMAGE_NAME}-jvm . -f src/main/docker/Dockerfile.jvm
+
+      - name: Build with Maven
+        run: mvn --batch-mode package -Pnative
+
+      - name: Create image
+        run: |
+          docker build -t ${IMAGE_NAME}-native . -f src/main/docker/Dockerfile.native-distroless
+
+      - name: Login to github container repository
+        if: ${{github.head_ref == ''}} # only for non-PRs
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image to github container repository
+        if: ${{github.head_ref == ''}} # only for non-PRs
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+
+          for i in jvm native; do
+            docker tag ${IMAGE_NAME}-${i} ${IMAGE_ID}-${i}:$VERSION
+            docker push ${IMAGE_ID}-${i}:$VERSION
+          done
