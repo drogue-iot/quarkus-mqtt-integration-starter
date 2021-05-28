@@ -204,24 +204,41 @@
 </body>
 
 <script>
-    const device_events = new EventSource("/sse/telemetry");
-    device_events.onmessage = function (event) {
-        console.log("SEE: ", event);
-        const obj = JSON.parse(event.data);
-        console.log("Device: ", obj)
-        document.getElementById("device_id").innerText = obj.deviceId;
-        document.getElementById("timestamp").innerText = obj.timestamp;
-        document.getElementById("temperature").innerText = obj.temperature;
-    };
-    const command_events = new EventSource("/sse/commands");
-    command_events.onmessage = function (event) {
-        console.log("SEE: ", event);
-        const obj = JSON.parse(event.data);
-        console.log("Command: ", obj)
-        document.getElementById("cmd_device_id").innerText = obj.deviceId;
-        document.getElementById("cmd_command").innerText = obj.command;
-        document.getElementById("cmd_payload").innerText = obj.payload;
-    };
+    function connect() {
+        const socket = new WebSocket("ws://" + location.host + "/ws");
+        socket.onopen = function () {
+            console.log("Connected to the web socket");
+        };
+        socket.onclose = function () {
+            console.log("Connection lost, trying to re-connect");
+            setTimeout(function () {
+                connect();
+            }, 5000);
+        };
+        socket.onerror = function () {
+            console.log("Connection error, closing socket");
+            socket.close();
+        };
+        socket.onmessage = function (m) {
+            console.log("Got message: " + m.data);
+            const obj = JSON.parse(m.data);
+            console.log("Message: ", obj)
+            if (obj.type === "telemetry") {
+                const payload = obj.payload;
+                document.getElementById("device_id").innerText = payload.deviceId;
+                document.getElementById("timestamp").innerText = payload.timestamp;
+                document.getElementById("temperature").innerText = payload.temperature;
+            } else if (obj.type === "command") {
+                const payload = obj.payload;
+                document.getElementById("cmd_device_id").innerText = payload.deviceId;
+                document.getElementById("cmd_command").innerText = payload.command;
+                document.getElementById("cmd_payload").innerText = payload.payload;
+            }
+
+        };
+    }
+
+    connect();
 
 </script>
 
