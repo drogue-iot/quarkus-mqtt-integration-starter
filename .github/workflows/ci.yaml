@@ -48,7 +48,7 @@ jobs:
 
       - name: Login to github container repository
         if: ${{github.head_ref == ''}} # only for non-PRs
-        run: echo "${{ secrets.GHCR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push image to github container repository
         if: ${{github.head_ref == ''}} # only for non-PRs
