@@ -101,6 +101,7 @@ public class Receiver {
         }
         device.setTimestamp(timestamp.toInstant());
         device.setTemperature(payload.getTemperature());
+        device.setLocation(payload.getGeoloc());
 
         // done
 

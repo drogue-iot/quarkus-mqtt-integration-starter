@@ -13,6 +13,7 @@ public class DeviceEvent {
     private String deviceId;
     private Instant timestamp;
     private double temperature;
+    private Location location;
 
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
@@ -38,12 +39,21 @@ public class DeviceEvent {
         return this.temperature;
     }
 
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", DeviceEvent.class.getSimpleName() + "[", "]")
                 .add("deviceId='" + deviceId + "'")
                 .add("timestamp=" + timestamp)
                 .add("temperature=" + temperature)
+                .add("location=" + location)
                 .toString();
     }
 }

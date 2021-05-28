@@ -115,9 +115,16 @@
             max-width: 50em;
         }
 
+        #map {
+            height: 50vh;
+        }
+
     </style>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 </head>
 <body>
 
@@ -134,6 +141,11 @@
             <p>
                 This page shows the events, sent by a device publishing their temperature sensor information.
             </p>
+        </div>
+
+        <!-- map -->
+        <div class="row">
+            <div id="map"></div>
         </div>
 
         <div class="row">
@@ -204,6 +216,13 @@
 </body>
 
 <script>
+
+    const map = L.map('map').setView([0, 0], 2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
     function connect() {
         const socket = new WebSocket("ws://" + location.host + "/ws");
         socket.onopen = function () {
@@ -228,6 +247,14 @@
                 document.getElementById("device_id").innerText = payload.deviceId;
                 document.getElementById("timestamp").innerText = payload.timestamp;
                 document.getElementById("temperature").innerText = payload.temperature;
+                if (payload.location) {
+                    L.popup({
+                        "autoClose": true
+                    })
+                        .setLatLng(payload.location)
+                        .setContent('<p>' + payload.temperature + '°C</p>')
+                        .openOn(map);
+                }
             } else if (obj.type === "command") {
                 const payload = obj.payload;
                 document.getElementById("cmd_device_id").innerText = payload.deviceId;
