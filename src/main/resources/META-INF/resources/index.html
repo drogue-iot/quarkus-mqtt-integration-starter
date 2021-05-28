@@ -224,7 +224,14 @@
     }).addTo(map);
 
     function connect() {
-        const socket = new WebSocket("ws://" + location.host + "/ws");
+        let proto;
+        if (location.protocol === "https:") {
+            proto = "wss://";
+        } else {
+            proto = "ws://";
+        }
+        console.log("Protocol: ", proto);
+        const socket = new WebSocket(proto + location.host + "/ws");
         socket.onopen = function () {
             console.log("Connected to the web socket");
         };
