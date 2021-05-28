@@ -38,3 +38,12 @@ mp:
         port: ${drogue.integration.mqtt.port}
         username: ${drogue.integration.mqtt.username}
         password: ${drogue.integration.mqtt.password}
+
+"%dev":
+  quarkus:
+    log:
+      category:
+        "io.vertx.mqtt":
+          level: DEBUG
+        "io.smallrye":
+          level: DEBUG
