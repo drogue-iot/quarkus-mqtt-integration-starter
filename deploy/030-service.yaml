@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+
+metadata:
+  name: quarkus-mqtt-integration-starter
+  labels:
+    app.kubernetes.io/name: quarkus-mqtt-integration-starter
+
+spec:
+  selector:
+    app.kubernetes.io/name: quarkus-mqtt-integration-starter
+  ports:
+    - port: 8080
+      name: http
+      targetPort: http

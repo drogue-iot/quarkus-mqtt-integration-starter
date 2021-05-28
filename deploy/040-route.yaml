@@ -1,0 +1,17 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+
+metadata:
+  name: quarkus-mqtt-integration-starter
+  labels:
+    app.kubernetes.io/name: quarkus-mqtt-integration-starter
+
+spec:
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: quarkus-mqtt-integration-starter

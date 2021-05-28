@@ -1,0 +1,25 @@
+---
+kind: Secret
+apiVersion: v1
+
+metadata:
+  name: quarkus-mqtt-integration-starter
+  labels:
+    app.kubernetes.io/name: quarkus-mqtt-integration-starter
+
+#stringData:
+#  DROGUE_API_USER: "me"
+#  DROGUE_API_KEY: "my-secret"
+---
+kind: ConfigMap
+apiVersion: v1
+
+metadata:
+  name: quarkus-mqtt-integration-starter
+  labels:
+    app.kubernetes.io/name: quarkus-mqtt-integration-starter
+
+data:
+  DROGUE_INTEGRATION_MQTT_HOST: mqtt-integration-drogue-dev.apps.wonderful.iot-playground.org
+  DROGUE_INTEGRATION_MQTT_PORT: "443"
+  DROGUE_INTEGRATION_APPLICATION: drogue-public-temperature
