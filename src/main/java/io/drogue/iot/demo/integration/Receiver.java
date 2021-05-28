@@ -2,9 +2,6 @@ package io.drogue.iot.demo.integration;
 
 import static io.cloudevents.core.CloudEventUtils.mapData;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -19,8 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudevents.core.provider.EventFormatProvider;
 import io.cloudevents.jackson.JsonFormat;
 import io.cloudevents.jackson.PojoCloudEventDataMapper;
+import io.drogue.iot.demo.Channels;
 import io.drogue.iot.demo.data.DeviceEvent;
-import io.drogue.iot.demo.data.TtnUplink;
+import io.drogue.iot.demo.data.Payload;
 import io.quarkus.runtime.Startup;
 import io.smallrye.reactive.messaging.annotations.Broadcast;
 
@@ -42,8 +40,8 @@ public class Receiver {
      * @param rawMessage The raw MQTT message.
      * @return The processed {@link DeviceEvent}, or {@code null} if the event couldn't be processed.
      */
-    @Incoming("telemetry")
-    @Outgoing("event-stream")
+    @Incoming(Channels.DROGUE_INBOUND)
+    @Outgoing(Channels.TELEMETRY)
     @Broadcast
     public DeviceEvent process(Message<byte[]> rawMessage) {
 
@@ -57,22 +55,52 @@ public class Receiver {
                 .getInstance()
                 .resolveFormat(JsonFormat.CONTENT_TYPE);
 
-        var event = format.deserialize(rawMessage.getPayload());
+        if (format == null) {
+            LOG.warn("Failed to resolve CloudEvent format provider");
+            return null;
+        }
 
-        LOG.info("Received event: {}", event);
+        var message = format.deserialize(rawMessage.getPayload());
 
-        var ttnMessage = mapData(
-                event,
-                PojoCloudEventDataMapper.from(this.objectMapper, TtnUplink.class)
+        LOG.debug("Received event: {}", message);
+
+        var schema = message.getDataSchema();
+        if (schema == null || !schema.toString().equals("urn:drogue:iot:temperature")) {
+            LOG.info("Unknown data schema: {}", schema);
+            return null;
+        }
+
+        LOG.info("Received message: {}", message);
+
+        var mappedMessage = mapData(
+                message,
+                PojoCloudEventDataMapper.from(this.objectMapper, Payload.class)
         );
-        var uplink = ttnMessage.getValue().getUplinkMessage();
+        if (mappedMessage == null || mappedMessage.getValue() == null) {
+            LOG.info("Failed to map event payload");
+            return null;
+        }
+
+        var payload = mappedMessage.getValue();
 
         // create device event
 
         var device = new DeviceEvent();
-        device.setDeviceId(event.getExtension("device").toString());
-        device.setTimestamp(uplink.getReceivedAt());
-        device.setPayload(StandardCharsets.UTF_8.decode(ByteBuffer.wrap(uplink.getPayload())).toString());
+
+        var deviceId = message.getExtension("device");
+        if (deviceId == null) {
+            LOG.info("Missing 'device' extension");
+            return null;
+        }
+        device.setDeviceId(deviceId.toString());
+
+        var timestamp = message.getTime();
+        if (timestamp == null) {
+            LOG.info("Missing attribute 'time'");
+            return null;
+        }
+        device.setTimestamp(timestamp.toInstant());
+        device.setTemperature(payload.getTemperature());
 
         // done
 

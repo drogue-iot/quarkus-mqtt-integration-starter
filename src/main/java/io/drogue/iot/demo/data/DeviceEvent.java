@@ -1,6 +1,7 @@
 package io.drogue.iot.demo.data;
 
 import java.time.Instant;
+import java.util.StringJoiner;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
@@ -11,7 +12,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 public class DeviceEvent {
     private String deviceId;
     private Instant timestamp;
-    private String payload;
+    private double temperature;
 
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
@@ -29,11 +30,20 @@ public class DeviceEvent {
         return this.timestamp;
     }
 
-    public void setPayload(String payload) {
-        this.payload = payload;
+    public void setTemperature(double temperature) {
+        this.temperature = temperature;
     }
 
-    public String getPayload() {
-        return this.payload;
+    public double getTemperature() {
+        return this.temperature;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", DeviceEvent.class.getSimpleName() + "[", "]")
+                .add("deviceId='" + deviceId + "'")
+                .add("timestamp=" + timestamp)
+                .add("temperature=" + temperature)
+                .toString();
     }
 }

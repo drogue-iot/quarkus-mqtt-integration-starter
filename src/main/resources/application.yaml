@@ -1,0 +1,40 @@
+drogue:
+  integration:
+    mqtt:
+      host: mqtt-integration-drogue-dev.apps.wonderful.iot-playground.org
+      port: 443
+      ssl: true
+      clientId: drogue-iot-quarkus-demo
+      # Can be an OAuth2 token, username + API key, or leave it empty for anonymous users.
+      username:
+      password:
+
+    application: drogue-public-temperature
+
+mp:
+  messaging:
+    #
+    # Configure the MQTT source (we read from it)
+    #
+    incoming:
+      drogue-inbound:
+        type: smallrye-mqtt
+        ssl: ${drogue.integration.mqtt.ssl}
+        client-id: ${drogue.integration.mqtt.clientId}
+        topic: app/${drogue.integration.application}
+        host: ${drogue.integration.mqtt.host}
+        port: ${drogue.integration.mqtt.port}
+        username: ${drogue.integration.mqtt.username}
+        password: ${drogue.integration.mqtt.password}
+    #
+    # Configure the MQTT sink (we send commands to)
+    #
+    outgoing:
+      drogue-outbound:
+        type: smallrye-mqtt
+        ssl: ${drogue.integration.mqtt.ssl}
+        client-id: ${drogue.integration.mqtt.clientId}
+        host: ${drogue.integration.mqtt.host}
+        port: ${drogue.integration.mqtt.port}
+        username: ${drogue.integration.mqtt.username}
+        password: ${drogue.integration.mqtt.password}

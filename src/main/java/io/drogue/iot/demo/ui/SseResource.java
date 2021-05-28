@@ -9,48 +9,36 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.jboss.resteasy.reactive.RestSseElementType;
 
-import io.drogue.iot.demo.Processor;
+import io.drogue.iot.demo.Channels;
 import io.drogue.iot.demo.data.DeviceCommand;
 import io.drogue.iot.demo.data.DeviceEvent;
+import io.drogue.iot.demo.state.CurrentState;
 import io.smallrye.mutiny.Multi;
 
 /**
  * This resource is used by the main UI entrypoint, providing a stream for the events.
  */
-@Path("/events")
-public class EventsResource {
-
+@Path("/sse")
+public class SseResource {
     @Inject
-    Processor processor;
-
-    @Inject
-    @Channel("response-changes")
-    Multi<String> responseChanges;
-
-    @Inject
-    @Channel("event-stream")
+    @Channel(Channels.TELEMETRY)
     Multi<DeviceEvent> events;
 
     @Inject
-    @Channel("device-commands")
+    @Channel(Channels.COMMAND)
     Multi<DeviceCommand> commands;
 
+    @Inject
+    CurrentState currentState;
+
     @GET
-    @Path("/stream")
+    @Path("/telemetry")
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestSseElementType(MediaType.APPLICATION_JSON)
     public Multi<DeviceEvent> stream() {
-        return this.events;
-    }
-
-    @GET
-    @Path("/response")
-    @Produces(MediaType.SERVER_SENT_EVENTS)
-    @RestSseElementType(MediaType.APPLICATION_JSON)
-    public Multi<String> responseChanges() {
         return Multi.createFrom()
-                .item(this.processor.getResponse())
-                .onCompletion().switchTo(this.responseChanges);
+                .item(this.currentState.getLastEvent())
+                .onCompletion().switchTo(this.events);
     }
 
     @GET

@@ -2,14 +2,18 @@ apiVersion: 1.0.0
 metadata:
   generateName: drogue-iot-
 projects:
-  - name: quarkus-quickstarts
+  - name: quarkus-mqtt-integration-starter
     source:
       type: git
-      location: 'https://github.com/drogue-iot/drogue-quarkus-mqtt-integration-starter.git'
+      location: 'https://github.com/drogue-iot/quarkus-mqtt-integration-starter.git'
       branch: main
 components:
-  - type: chePlugin
-    id: redhat/quarkus-java11/latest
+  - id: redhat/vscode-xml/latest
+    type: chePlugin
+  - id: redhat/quarkus-java11/latest
+    type: chePlugin
+  - id: redhat/vscode-yaml/latest
+    type: chePlugin
   - type: dockerimage
     alias: maven
     image: quay.io/eclipse/che-quarkus:7.30.2
@@ -18,7 +22,7 @@ components:
         value: '-XX:MaxRAMPercentage=50.0 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom -Duser.home=/home/jboss'
       - name: MAVEN_OPTS
         value: $(JAVA_OPTS)
-    memoryLimit: 512Mi
+    memoryLimit: 1Gi
     mountSources: true
     volumes:
       - name: m2
@@ -39,27 +43,19 @@ components:
         name: tests
         port: 8081
 
-  - id: redhat/vscode-didact/latest
-    preferences:
-      didact.defaultUrl: "{{ DEVFILE_REGISTRY_URL }}/devfiles/quarkus/didact.md"
-      che.welcome.enable: false
-      didact.openDefaultTutorialAtStartup: true
-    type: chePlugin
-    alias: didact-plugin
-
 commands:
-  - name: 1. Package the application
-    actions:
-      - type: exec
-        component: maven
-        command: mvn package
-        workdir: '${CHE_PROJECTS_ROOT}/drogue-quarkus-mqtt-integration-starter'
-  - name: 2. Start Quarkus in devmode (hot deploy + debug)
+  - name: Start Quarkus in devmode (hot deploy + debug)
     actions:
       - type: exec
         component: maven
         command: 'mvn compile quarkus:dev -Dquarkus.http.host=0.0.0.0 -Dquarkus.live-reload.instrumentation=false'
-        workdir: '${CHE_PROJECTS_ROOT}/drogue-quarkus-mqtt-integration-starter'
+        workdir: '${CHE_PROJECTS_ROOT}/quarkus-mqtt-integration-starter'
+  - name: Package the application
+    actions:
+      - type: exec
+        component: maven
+        command: mvn package
+        workdir: '${CHE_PROJECTS_ROOT}/quarkus-mqtt-integration-starter'
   - name: Attach remote debugger
     actions:
       - type: vscode-launch

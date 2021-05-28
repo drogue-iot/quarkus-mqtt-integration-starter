@@ -9,6 +9,7 @@ import org.eclipse.microprofile.reactive.messaging.Outgoing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.drogue.iot.demo.Channels;
 import io.drogue.iot.demo.data.DeviceCommand;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import io.quarkus.runtime.Startup;
@@ -23,18 +24,17 @@ public class Sender {
 
     private static final Logger LOG = LoggerFactory.getLogger(Sender.class);
 
-    @ConfigProperty(name = "drogue.application.name")
+    @ConfigProperty(name = "drogue.integration.application")
     String applicationName;
 
-    @Incoming("device-commands")
-    @Outgoing("commands")
+    @Incoming(Channels.COMMAND)
+    @Outgoing(Channels.DROGUE_OUTBOUND)
     public Message<byte[]> commands(DeviceCommand command) {
         LOG.info("Request to send device command: {}", command);
 
-        var topic = "command/" + this.applicationName + "/" + command.getDeviceId() + "/port:1";
+        var topic = "command/" + this.applicationName + "/" + command.getDeviceId() + "/" + command.getCommand();
 
-        LOG.info("Sending to topic: {}", topic);
-        LOG.info("Sending payload: {}", command.getPayload());
+        LOG.info("Sending to topic: {} -> {}", topic, command.getPayload());
 
         return MqttMessage.of(topic, command.getPayload(), MqttQoS.AT_LEAST_ONCE);
     }

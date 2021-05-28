@@ -11,6 +11,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 @RegisterForReflection
 public class DeviceCommand {
     private String deviceId;
+    private String command;
     private byte[] payload;
 
     public String getDeviceId() {
@@ -19,6 +20,14 @@ public class DeviceCommand {
 
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public String getCommand() {
+        return this.command;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
     }
 
     public byte[] getPayload() {
@@ -33,6 +42,7 @@ public class DeviceCommand {
     public String toString() {
         return new StringJoiner(", ", DeviceCommand.class.getSimpleName() + "[", "]")
                 .add("deviceId='" + this.deviceId + "'")
+                .add("command='" + this.command + "'")
                 .add("payload=" + Arrays.toString(this.payload))
                 .toString();
     }
