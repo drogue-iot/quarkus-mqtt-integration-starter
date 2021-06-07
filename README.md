@@ -47,8 +47,17 @@ Once it is running, you can navigate to its web frontend and should see somethin
 
 ![Screenshot](docs/screenshot.png)
 
+### What does it show?
+
+The dashboard will show the most recent state information. If the temperature information did have geo-coordinates
+attached, it will drop a marker on the map with the measured temperature. Only the most recent value will be shown.
+
 ### Where does the data come from?
 
 The data comes from a public instance of Drogue IoT. The Quarkus backend subscribes to the data stream using MQTT and
 consumes all incoming data.
 
+## What is next?
+
+You can clone this repository, and start making modifcations to the example. Either running it locally, or deploying it
+on your own cluster.
