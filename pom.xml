@@ -22,6 +22,8 @@
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
 
         <cloudevents.version>2.0.0</cloudevents.version>
+
+        <quarkus.package.type>uber-jar</quarkus.package.type>
     </properties>
     <dependencyManagement>
         <dependencies>
