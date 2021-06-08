@@ -26,6 +26,7 @@ mp:
         port: ${drogue.integration.mqtt.port}
         username: ${drogue.integration.mqtt.username}
         password: ${drogue.integration.mqtt.password}
+        broadcast: true
     #
     # Configure the MQTT sink (we send commands to)
     #
