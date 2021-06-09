@@ -26,6 +26,7 @@ mp:
         port: ${drogue.integration.mqtt.port}
         username: ${drogue.integration.mqtt.username}
         password: ${drogue.integration.mqtt.password}
+        connect-timeout-seconds: 60000 # see: https://github.com/smallrye/smallrye-reactive-messaging/issues/1246
         broadcast: true
     #
     # Configure the MQTT sink (we send commands to)
@@ -39,6 +40,7 @@ mp:
         port: ${drogue.integration.mqtt.port}
         username: ${drogue.integration.mqtt.username}
         password: ${drogue.integration.mqtt.password}
+        connect-timeout-seconds: 60000 # see: https://github.com/smallrye/smallrye-reactive-messaging/issues/1246
 
 "%dev":
   quarkus:
